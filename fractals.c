@@ -6,7 +6,7 @@
 /*   By: abdsalah <abdsalah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/23 17:59:28 by abdsalah          #+#    #+#             */
-/*   Updated: 2024/11/28 01:14:46 by abdsalah         ###   ########.fr       */
+/*   Updated: 2024/11/29 01:13:47 by abdsalah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 2222233334567        9A                         A532221111111000000000000000000
 222333346679                                    9432221111111000000000000000000
 234445568  F                                   B5432221111111000000000000000000
-                                              864332221111111000000000000000000
+												864332221111111000000000000000000
 234445568  F                                   B5432221111111000000000000000000
 222333346679                                    9432221111111000000000000000000
 2222233334567        9A                         A532221111111000000000000000000
@@ -40,72 +40,88 @@
 000000011111111111111111122222233347E7AB322222111100000000000000000000000000000
 */
 
-int	calculate_mandelbrot(double c_re, double c_im, int max_iterations)
+static int	ft_calculate_mandelbrot(t_complex c, int max_iterations)
 {
-	double	z_re;
-	double	z_im;
-	int		iteration;
-	double	temp;
+	t_complex	z;
+	int			iteration;
+	double		temp;
 
-	z_re = c_re;
-	z_im = c_im;
+	z.real = c.real;
+	z.imag = c.imag;
 	iteration = 0;
-	while (z_re * z_re + z_im * z_im <= 4 && iteration < max_iterations)
+	while (z.real * z.real + z.imag * z.imag <= 4 && iteration < max_iterations)
 	{
-		temp = z_re * z_re - z_im * z_im + c_re;
-		z_im = 2 * z_re * z_im + c_im;
-		z_re = temp;
+		temp = z.real * z.real - z.imag * z.imag + c.real;
+		z.imag = 2 * z.real * z.imag + c.imag;
+		z.real = temp;
 		iteration++;
 	}
 	return (iteration);
 }
 
-int	calculate_julia(double z_re, double z_im, double c_re, double c_im,
-		int max_iterations)
+static int	ft_calculate_julia(t_complex z, double c_re, double c_im, int max_iterations)
 {
 	int		iteration;
 	double	temp;
 
 	iteration = 0;
-	while (z_re * z_re + z_im * z_im <= 4 && iteration < max_iterations)
+	while (z.real * z.real + z.imag * z.imag <= 4 && iteration < max_iterations)
 	{
-		temp = z_re * z_re - z_im * z_im + c_re;
-		z_im = 2 * z_re * z_im + c_im;
-		z_re = temp;
+		temp = z.real * z.real - z.imag * z.imag + c_re;
+		z.imag = 2 * z.real * z.imag + c_im;
+		z.real = temp;
 		iteration++;
 	}
 	return (iteration);
 }
 
-int	calculate_burning_ship(double c_re, double c_im, int max_iterations)
+static int	ft_calculate_burning_ship(t_complex c, int max_iterations)
 {
-	double	z_re;
-	double	z_im;
-	double	temp;
-	int		iteration;
+	t_complex	z;
+	double		temp;
+	int			iteration;
 
-	z_re = c_re;
-	z_im = c_im;
+	z.real = c.real;
+	z.imag = c.imag;
 	iteration = 0;
-	while (z_re * z_re + z_im * z_im <= 4 && iteration < max_iterations)
+	while (z.real * z.real + z.imag * z.imag <= 4 && iteration < max_iterations)
 	{
-		z_re = fabs(z_re);
-		z_im = fabs(z_im);
-		temp = z_re * z_re - z_im * z_im + c_re;
-		z_im = 2 * z_re * z_im + c_im;
-		z_re = temp;
+		z.real = fabs(z.real);
+		z.imag = fabs(z.imag);
+		temp = z.real * z.real - z.imag * z.imag + c.real;
+		z.imag = 2 * z.real * z.imag + c.imag;
+		z.real = temp;
 		iteration++;
 	}
 	return (iteration);
+}
+
+static int	ft_get_pixel_color(t_graphics *graphics, t_complex c)
+{
+	int	color;
+
+	color = 0;
+	if (graphics->fractal->name && strcmp(graphics->fractal->name,
+			"mandelbrot") == 0)
+		color = ft_calculate_mandelbrot(c, graphics->fractal->max_iter) * 0x010101;
+	else if (graphics->fractal->name && strcmp(graphics->fractal->name,
+			"julia") == 0)
+		color = ft_calculate_julia(c, graphics->fractal->julia_re,
+				graphics->fractal->julia_im, graphics->fractal->max_iter)
+			* 0x010101;
+	else if (graphics->fractal->name && strcmp(graphics->fractal->name,
+			"burning_ship") == 0)
+		color = ft_calculate_burning_ship(c, graphics->fractal->max_iter)
+			* 0x010101;
+	return (color);
 }
 
 void	render_fractal(t_graphics *graphics)
 {
-	double	c_re;
-	double	c_im;
-	int		color;
-	int		y;
-	int		x;
+	t_complex	c;
+	int			color;
+	int			y;
+	int			x;
 
 	y = -1;
 	while (++y < HEIGHT)
@@ -113,24 +129,11 @@ void	render_fractal(t_graphics *graphics)
 		x = -1;
 		while (++x < WIDTH)
 		{
-			c_re = (x - WIDTH / 2.0) * 4.0 / WIDTH / graphics->fractal->zoom
+			c.real = (x - WIDTH / 2.0) * 4.0 / WIDTH / graphics->fractal->zoom
 				+ graphics->fractal->shift_x;
-			c_im = (y - HEIGHT / 2.0) * 4.0 / WIDTH / graphics->fractal->zoom
+			c.imag = (y - HEIGHT / 2.0) * 4.0 / WIDTH / graphics->fractal->zoom
 				+ graphics->fractal->shift_y;
-			color = 0;
-			if (graphics->fractal->name && strcmp(graphics->fractal->name,
-					"mandelbrot") == 0)
-				color = calculate_mandelbrot(c_re, c_im,
-						graphics->fractal->max_iter) * 0x010101;
-			else if (graphics->fractal->name && strcmp(graphics->fractal->name,
-					"julia") == 0)
-				color = calculate_julia(c_re, c_im, graphics->fractal->julia_re,
-						graphics->fractal->julia_im,
-						graphics->fractal->max_iter) * 0x010101;
-			else if (graphics->fractal->name && strcmp(graphics->fractal->name,
-					"burning_ship") == 0)
-				color = calculate_burning_ship(c_re, c_im,
-						graphics->fractal->max_iter) * 0x010101;
+			color = ft_get_pixel_color(graphics, c);
 			graphics->data[y * WIDTH + x] = color;
 		}
 	}

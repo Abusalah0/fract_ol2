@@ -6,14 +6,14 @@
 /*   By: abdsalah <abdsalah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/23 17:59:25 by abdsalah          #+#    #+#             */
-/*   Updated: 2024/11/28 00:31:26 by abdsalah         ###   ########.fr       */
+/*   Updated: 2024/11/29 01:15:36 by abdsalah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fract_ol.h"
 #include "minilibx-linux/mlx.h"
 
-void	zoom(t_graphics *graphics, double zoom_factor)
+static void	zoom(t_graphics *graphics, double zoom_factor)
 {
 	double	width;
 	double	height;
@@ -37,7 +37,7 @@ int	key_handler(int keycode, t_graphics *graphics)
 	if (keycode == ESC_KEY)
 	{
 		mlx_destroy_image(graphics->mlx, graphics->img);
-		mlx_clear_window(graphics->mlx,graphics->win);
+		mlx_clear_window(graphics->mlx, graphics->win);
 		mlx_destroy_window(graphics->mlx, graphics->win);
 		mlx_destroy_display(graphics->mlx);
 		free(graphics->mlx);

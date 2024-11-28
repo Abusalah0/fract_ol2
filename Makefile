@@ -2,7 +2,7 @@ CC = cc
 CFLAGS = -Wall -Werror -Wextra
 MLX_FLAGS = -I./minilibx-linux -L./minilibx-linux -lmlx -lXext -lX11 -lm
 
-SRC = main.c fractals.c key_events.c
+SRC = main.c fractals.c key_events.c init_structs.c error_handling.c colors.c
 OBJ = $(SRC:.c=.o)
 NAME = mandelbrot
 
